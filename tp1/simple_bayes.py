@@ -103,7 +103,6 @@ examples = [
 #nbc.fit()
 #print(nbc.predict([0,0,1,1,1]))
 
-
 # El ejemplo del ppt 
 # Tomo 'a' como verdadero y 'b' como falso
 e2 = [
