@@ -25,6 +25,8 @@ class MultinomialBayesClassifier:
         for histogram, klass in examples:
             if klass not in class_histograms:
                 class_histograms[klass] = {}
+                class_counts[klass] = 0
+
 
             for word, freq in histogram.items():
                 if word not in universe:
@@ -33,7 +35,6 @@ class MultinomialBayesClassifier:
 
                 if word not in class_histograms[klass]:
                     class_histograms[klass][word] = 0
-                    class_counts[klass] = 0
 
                 class_histograms[klass][word] += freq
                 class_counts[klass] += freq
@@ -86,37 +87,81 @@ class MultinomialBayesClassifier:
 import csv
 from collections import Counter
 
-texts = []
-with open('textminingAllLyrics.csv') as tsvfile:
-  reader = csv.reader(tsvfile)
-  next(reader)
-  i = 0
-  for row in reader:
-    texts.append((row[1], row[2]))
-      
-universe = set()
-examples = []
-for text, klass in texts:
-    tarr = text.split(' ')
-    universe.update(tarr)
-    examples.append((Counter(tarr), klass))
 
-train = []
-evaluate = []
-for i in range(len(examples)):
-    if i % 40 == 0:
-        evaluate.append(examples[i])
-    else:
-        train.append(examples[i])
+def example_lyrics():
+    texts = []
+    with open('textminingAllLyrics.csv') as tsvfile:
+        reader = csv.reader(tsvfile)
+        next(reader)
+        i = 0
+        for row in reader:
+            texts.append((row[1], row[2]))
+        
+    universe = set()
+    examples = []
+    for text, klass in texts:
+        tarr = text.split(' ')
+        universe.update(tarr)
+        examples.append((Counter(tarr), klass))
 
-mbc = MultinomialBayesClassifier()
-mbc.fit(universe, train)
+    train = []
+    evaluate = []
+    for i in range(len(examples)):
+        if i % 40 == 0:
+            evaluate.append(examples[i])
+        else:
+            train.append(examples[i])
 
-correct = 0
-total = 0
-for ex in evaluate:
-    if (ex[1] == mbc.predict(ex[0])):
-        correct += 1
-    total += 1
+    mbc = MultinomialBayesClassifier()
+    mbc.fit(universe, train)
 
-print(correct/total)
+    correct = 0
+    total = 0
+    for ex in evaluate:
+        if (ex[1] == mbc.predict(ex[0])):
+            correct += 1
+        total += 1
+
+    print(correct/total)
+
+
+
+def example_news():
+    texts = []
+    with open('aa_bayes.tsv') as tsvfile:
+        reader = csv.reader(tsvfile, delimiter = "\t")
+        next(reader)   # Skip header
+        i = 0
+        for row in reader:
+            if(len(row) > 3):
+                texts.append((row[1], row[3]))
+        
+    universe = set()
+    examples = []
+    for text, klass in texts:
+        tarr = text.split(' ')
+        universe.update(tarr)
+        examples.append((Counter(tarr), klass))
+
+    train = []
+    evaluate = []
+    for i in range(30000):
+        if i % 500 == 0:
+            evaluate.append(examples[i])
+        else:
+            train.append(examples[i])
+
+    mbc = MultinomialBayesClassifier()
+    mbc.fit(universe, train)
+
+    correct = 0
+    total = 0
+    for ex in evaluate:
+        if (ex[1] == mbc.predict(ex[0])):
+            correct += 1
+        total += 1
+
+    print(correct/total)
+
+example_lyrics()
+example_news()
