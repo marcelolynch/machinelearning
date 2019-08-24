@@ -1,6 +1,6 @@
 import numpy as np 
 from math import log, factorial
-
+from preprocessor import tokenize_document, basic_tokenize_document
 
 class MultinomialBayesClassifier:        
     def __init__(self):
@@ -100,9 +100,9 @@ def example_lyrics():
     universe = set()
     examples = []
     for text, klass in texts:
-        tarr = text.split(' ')
-        universe.update(tarr)
-        examples.append((Counter(tarr), klass))
+        histogram = tokenize_document(text, grams_count = 1)
+        universe.update(histogram.keys())
+        examples.append((histogram, klass))
 
     train = []
     evaluate = []
@@ -139,9 +139,9 @@ def example_news():
     universe = set()
     examples = []
     for text, klass in texts:
-        tarr = text.split(' ')
-        universe.update(tarr)
-        examples.append((Counter(tarr), klass))
+        histogram = tokenize_document(text, grams_count = 1)
+        universe.update(histogram.keys())
+        examples.append((histogram, klass))
 
     train = []
     evaluate = []
@@ -163,5 +163,8 @@ def example_news():
 
     print(correct/total)
 
+print('Lyrics')
 example_lyrics()
+
+print('News')
 example_news()
