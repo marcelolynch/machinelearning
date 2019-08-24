@@ -1,12 +1,7 @@
 from nltk import ngrams, everygrams, word_tokenize
 from collections import Counter
-from nltk.corpus import stopwords
+# from nltk.corpus import stopwords
 from string import punctuation
-
-# stoplist = set(stopwords.words('spanish') + list(punctuation))
-stoplist = [] # set(list(punctuation))
-
-print(stoplist)
 
 """ Get the historgram of tokens for the given document
     after preprocessing.
