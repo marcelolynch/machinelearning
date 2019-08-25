@@ -63,7 +63,7 @@ class MultinomialBayesClassifier:
                 dict(_, int). The histogram for the target case  
         """
         if not self.fitted:
-            raise "Must fit the model before predicting"
+            raise Exception("Must fit the model before predicting")
 
         map_log_prob = -100000000
         map_class = None
