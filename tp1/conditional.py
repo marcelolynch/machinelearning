@@ -36,7 +36,8 @@ with open('binary.csv') as binary:
 
         
 # Deberian ser iguales por la independencia condicional pero no lo son
-#print(count_intersection/rank_count)                  # P(GRE = 1, GPA = 1 | Rank = 1)
+print(count_intersection/rank_count)                  # P(GRE = 1, GPA = 1 | Rank = 1)
+print((count_gpa/rank_count) * (count_gre/rank_count))  # P(GRE = 1 | Rank = 1) * P(GPA = 1 | Rank = 1 )
+
 #print((count_gpa/rank_count))
-print((count_gre/rank_count))
-#print((count_gpa/rank_count) * (count_gre/rank_count))  # P(GRE = 1 | Rank = 1) * P(GPA = 1 | Rank = 1 )
+#print((count_gre/rank_count))
