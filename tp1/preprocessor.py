@@ -1,13 +1,11 @@
-from nltk import ngrams, everygrams, word_tokenize
+from nltk import ngrams, everygrams
 from collections import Counter
-# from nltk.corpus import stopwords
 from string import punctuation
 
 """ Get the historgram of tokens for the given document
     after preprocessing.
 """
 def tokenize_document(document, *, grams_count = 1):
-    print(document)
     document = document.lower()
 
     # Remove punctuation

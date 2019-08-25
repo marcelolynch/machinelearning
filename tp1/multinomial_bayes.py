@@ -1,6 +1,5 @@
 import numpy as np 
 from math import log, factorial
-from preprocessor import tokenize_document, basic_tokenize_document
 
 class MultinomialBayesClassifier:        
     def __init__(self):
@@ -81,90 +80,3 @@ class MultinomialBayesClassifier:
                 map_class = klass
         
         return map_class         
-
-
-# ============= Example ====================
-import csv
-from collections import Counter
-
-
-def example_lyrics():
-    texts = []
-    with open('textminingAllLyrics.csv') as tsvfile:
-        reader = csv.reader(tsvfile)
-        next(reader)
-        i = 0
-        for row in reader:
-            texts.append((row[1], row[2]))
-        
-    universe = set()
-    examples = []
-    for text, klass in texts:
-        histogram = tokenize_document(text, grams_count = 1)
-        universe.update(histogram.keys())
-        examples.append((histogram, klass))
-
-    train = []
-    evaluate = []
-    for i in range(len(examples)):
-        if i % 40 == 0:
-            evaluate.append(examples[i])
-        else:
-            train.append(examples[i])
-
-    mbc = MultinomialBayesClassifier()
-    mbc.fit(universe, train)
-
-    correct = 0
-    total = 0
-    for ex in evaluate:
-        if (ex[1] == mbc.predict(ex[0])):
-            correct += 1
-        total += 1
-
-    print(correct/total)
-
-
-
-def example_news():
-    texts = []
-    with open('aa_bayes.tsv') as tsvfile:
-        reader = csv.reader(tsvfile, delimiter = "\t")
-        next(reader)   # Skip header
-        i = 0
-        for row in reader:
-            if(len(row) > 3):
-                texts.append((row[1], row[3]))
-        
-    universe = set()
-    examples = []
-    for text, klass in texts:
-        histogram = tokenize_document(text, grams_count = 1)
-        universe.update(histogram.keys())
-        examples.append((histogram, klass))
-
-    train = []
-    evaluate = []
-    for i in range(30000):
-        if i % 500 == 0:
-            evaluate.append(examples[i])
-        else:
-            train.append(examples[i])
-
-    mbc = MultinomialBayesClassifier()
-    mbc.fit(universe, train)
-
-    correct = 0
-    total = 0
-    for ex in evaluate:
-        if (ex[1] == mbc.predict(ex[0])):
-            correct += 1
-        total += 1
-
-    print(correct/total)
-
-print('Lyrics')
-example_lyrics()
-
-print('News')
-example_news()
