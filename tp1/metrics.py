@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
 from scipy.stats import hmean
 
 """ Print scores for the classifier, evaluating the given test.
@@ -10,7 +9,7 @@ from scipy.stats import hmean
     confusion_matrix:
         bool. Plot normalized confusion matrix.
 """
-def score(classifier, test, classes, *, confusion_matrix = False, normalize = True):
+def score(classifier, test, classes, *, confusion_matrix = False, normalize = False):
     y_true = [ex[1] for ex in test]
     y_pred = [classifier.predict(ex[0]) for ex in test]
 
@@ -75,6 +74,17 @@ def false_negatives(c, y_pred, y_true):
     fn = np.count_nonzero(y_true[n_indexes] == c)
     return fn
 
+def calculate_confusion_matrix(y_true, y_pred):
+    classes = np.unique(y_true)
+    cm = np.zeros((len(classes), len(classes)), dtype=int)
+    for tl in classes:
+        true_ind = np.where(y_true == tl)
+        pred = y_pred[true_ind]
+        for pl in classes:
+            cm[tl, pl] = np.count_nonzero(pred == pl)
+
+    return cm
+
 # Taken from https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
 def plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
@@ -91,7 +101,7 @@ def plot_confusion_matrix(y_true, y_pred, classes,
             title = 'Confusion matrix, without normalization'
 
     # Compute confusion matrix
-    cm = confusion_matrix(y_true, y_pred)
+    cm = calculate_confusion_matrix(y_true, y_pred)
 
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]

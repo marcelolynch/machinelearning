@@ -20,6 +20,7 @@ parser.add_argument('--nsplits', action="store", type=int, default = 10)
 parser.add_argument('--test_ratio', action="store", dest="test_ratio", type=restricted_float, default = 0.1)
 parser.add_argument('--random_seed', action="store", type=int, default = 1)
 parser.add_argument('--confusion_matrix', action='store_true')
+parser.add_argument('--normalize', action='store_true')
 
 # Sample run
 # python evaluate.py --validation bootstrap --nsplits 3 --test_ratio .2 --confusion_matrix
@@ -50,7 +51,7 @@ examples = np.array(examples)
 classes = list(set(c for t, c in texts))
 
 model_selectors = { 
-    'kfold': KFold(n_splits = args.nsplits, random_state = args.random_seed),
+    'kfold': KFold(n_splits = args.nsplits if args.nsplits > 1 else 2, random_state = args.random_seed),
     # TODO: check if this is really bootstrap
     'bootstrap': ShuffleSplit(n_splits = args.nsplits, test_size = args.test_ratio, random_state = args.random_seed)
 }
@@ -69,6 +70,6 @@ for train_index, test_index in model_selector.split(examples):
     
     mbc = MultinomialBayesClassifier()
     mbc.fit(universe, train)
-    score(mbc, test, classes, confusion_matrix = args.confusion_matrix)
+    score(mbc, test, classes, confusion_matrix = args.confusion_matrix, normalize = args.normalize)
     print()
 
