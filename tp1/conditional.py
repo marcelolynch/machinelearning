@@ -1,7 +1,7 @@
 import csv
 
 
-RANK_VALUE = 2  # 1, 2, 3, 4
+RANK_VALUE = 1  # 1, 2, 3, 4
 GRE_VALUE = 1   # 0, 1
 GPA_VALUE = 1  # 0, 1
 

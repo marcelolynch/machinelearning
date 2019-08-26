@@ -44,6 +44,9 @@ class DiscreteBayesianNetwork:
                 self.parent_conditionals[node][t] = {}
                 for v in self.variables[node]:
                     self.parent_conditionals[node][t][v] = conditional_counts[node][t][v] / counts[node][t]      # P(node = v | parents = t)
+                    # self.parent_conditionals[node][t][v] = (conditional_counts[node][t][v] + 1) / (counts[node][t] + len(self.variables[node])) # Smoothed
+
+
     
     def _calculate_full_joint(self, targets):
         false_nodes = [x for x in targets.keys() if x not in self.nodes]
