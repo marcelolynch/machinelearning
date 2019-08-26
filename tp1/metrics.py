@@ -16,9 +16,9 @@ def score(classifier, test, classes, *, confusion_matrix = False, normalize = Fa
     y_true = np.array([classes.index(yt) for yt in y_true])
     y_pred = np.array([classes.index(yp) for yp in y_pred])
 
-    accuracies, precisions, recalls, f1s = [], [], [], []
+    accuracies, precisions, recalls, f1s, tp_rates, fp_rates = [], [], [], [], [], []
     for i, klass in enumerate(classes):
-        print(f'-- Class: {klass}')
+        print(f'* Class: {klass}')
 
         TP = true_positives(i, y_pred, y_true)
         TN = true_negatives(i, y_pred, y_true)
@@ -34,19 +34,26 @@ def score(classifier, test, classes, *, confusion_matrix = False, normalize = Fa
         precision = TP/(TP + FP)
         recall = TP/(TP + FN)
         f1 = (2 * precision * recall)/(precision + recall)
+        tp_rate = TP/(TP + FN)
+        fp_rate = FP/(FP + TN)
 
-        print(f'Accuracy {accuracy:.5f} | Precision {precision:.5f} | Recall {recall:.5f} | F1 {f1:.5f} \n')
+        print(f'Accuracy {accuracy:.5f} | Precision {precision:.5f} | Recall {recall:.5f} | TP-rate {tp_rate:.5f} | FP-rate {fp_rate:.5f} | F1 {f1:.5f} \n')
+
         accuracies.append(accuracy)
         precisions.append(precision)
         recalls.append(recall)
         f1s.append(f1)
+        tp_rates.append(tp_rate)
+        fp_rates.append(fp_rate)
 
     print('HARMONIC MEANS\n')
     print(f'    Accuracy: {hmean(accuracies):.5f}')
     print(f'    Precision: {hmean(precisions):.5f}')
     print(f'    Recall: {hmean(recalls):.5f}')
+    print(f'    TP rate: {hmean(tp_rates):.5f}')
+    print(f'    FP rate: {hmean(fp_rates):.5f}')
     print(f'    F1 score: {hmean(f1s):.5f}')
-    
+
     if confusion_matrix:
         # Plot confusion matrix
         title = 'Normalized confusion matrix' if normalize else 'Confusion matrix'
