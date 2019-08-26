@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+from scipy.stats import hmean
 
 """ Print scores for the classifier, evaluating the given test.
     
@@ -9,35 +10,70 @@ from sklearn.metrics import confusion_matrix
     confusion_matrix:
         bool. Plot normalized confusion matrix.
 """
-def score(classifier, test, classes, *, confusion_matrix = False):
-    correct = 0
-    total = 0
+def score(classifier, test, classes, *, confusion_matrix = False, normalize = True):
     y_true = [ex[1] for ex in test]
     y_pred = [classifier.predict(ex[0]) for ex in test]
 
-    # TODO: creo que habría que pensar en cambiar algunas cosas de como devuelve (y espera) los datos
-    # el clasificador para que se lleve mejor con otras herramientas y sea mas práctico sacar métricas.
     y_true = np.array([classes.index(yt) for yt in y_true])
     y_pred = np.array([classes.index(yp) for yp in y_pred])
 
-    total = len(test)
+    accuracies, precisions, recalls, f1s = [], [], [], []
+    for i, klass in enumerate(classes):
+        print(f'-- Class: {klass}')
+
+        TP = true_positives(i, y_pred, y_true)
+        TN = true_negatives(i, y_pred, y_true)
+        FN = false_negatives(i, y_pred, y_true)
+        FP = false_positives(i, y_pred, y_true)
+
+        # print('TP', TP)
+        # print('TN', TN)
+        # print('FN', FN)
+        # print('FP', FP)
+        
+        accuracy = (TP + TN)/(TP + FP + TN + FN)
+        precision = TP/(TP + FP)
+        recall = TP/(TP + FN)
+        f1 = (2 * precision * recall)/(precision + recall)
+
+        print(f'Accuracy {accuracy:.5f} | Precision {precision:.5f} | Recall {recall:.5f} | F1 {f1:.5f} \n')
+        accuracies.append(accuracy)
+        precisions.append(precision)
+        recalls.append(recall)
+        f1s.append(f1)
+
+    print('HARMONIC MEANS\n')
+    print(f'    Accuracy: {hmean(accuracies):.5f}')
+    print(f'    Precision: {hmean(precisions):.5f}')
+    print(f'    Recall: {hmean(recalls):.5f}')
+    print(f'    F1 score: {hmean(f1s):.5f}')
     
-    incorrect = np.count_nonzero(y_true - y_pred)
-
-    correct = total - incorrect
-    print(f'Test total: {total} - Incorrect: {incorrect} - Correct: {correct}')
-    print(f'Score: {correct/total}')
-
     if confusion_matrix:
-        # Plot non-normalized confusion matrix
-        # plot_confusion_matrix(y_true, y_pred, classes=classes, title='Confusion matrix, without normalization')
-
-        # # Plot normalized confusion matrix
-        plot_confusion_matrix(y_true, y_pred, classes=classes, normalize=True, title='Normalized confusion matrix')
+        # Plot confusion matrix
+        title = 'Normalized confusion matrix' if normalize else 'Confusion matrix'
+        plot_confusion_matrix(y_true, y_pred, classes=classes, normalize=normalize, title=title)
 
         plt.show()
 
-    return correct / total
+def true_positives(c, y_pred, y_true):
+    t_indexes = np.where(y_true == c)
+    tp = np.count_nonzero(y_pred[t_indexes] == c)
+    return tp
+
+def true_negatives(c, y_pred, y_true):
+    n_indexes = np.where(y_true != c)
+    tn = np.count_nonzero(y_pred[n_indexes] != c)
+    return tn
+
+def false_positives(c, y_pred, y_true):
+    p_indexes = np.where(y_pred == c)
+    fp = np.count_nonzero(y_true[p_indexes] != c)
+    return fp
+
+def false_negatives(c, y_pred, y_true):
+    n_indexes = np.where(y_pred != c)
+    fn = np.count_nonzero(y_true[n_indexes] == c)
+    return fn
 
 # Taken from https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
 def plot_confusion_matrix(y_true, y_pred, classes,

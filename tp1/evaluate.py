@@ -34,10 +34,12 @@ with open('aa_bayes.tsv') as tsvfile:
     for row in reader:
         if(len(row) > 3):
             texts.append((row[1], row[3]))
-    
+
+texts = texts[:30000] # Remove Noticias Destacadas
+
 universe = set()
 examples = []
-for text, klass in texts[:30000]:
+for text, klass in texts:
     histogram = basic_tokenize_document(text)
     universe.update(histogram.keys())
     examples.append((histogram, klass))
@@ -58,9 +60,8 @@ print(f'Running {args.validation} validation')
 print(args, '\n')
 
 split = 1
-scores = []
 for train_index, test_index in model_selector.split(examples):
-    print(f"---- Split {split} ----")
+    print(f"---- Split {split} ----\n")
     
     split += 1
     train = examples[train_index]
@@ -68,8 +69,6 @@ for train_index, test_index in model_selector.split(examples):
     
     mbc = MultinomialBayesClassifier()
     mbc.fit(universe, train)
-    s = score(mbc, test, classes, confusion_matrix = args.confusion_matrix)
-    scores.append(s)
+    score(mbc, test, classes, confusion_matrix = args.confusion_matrix)
     print()
 
-print(f'Average score: {np.mean(scores)}')
