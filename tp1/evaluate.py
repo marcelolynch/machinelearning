@@ -3,7 +3,7 @@ import numpy as np
 from collections import Counter
 from multinomial_bayes import MultinomialBayesClassifier
 from preprocessor import tokenize_document, basic_tokenize_document
-from sklearn.model_selection import KFold, ShuffleSplit
+from model_selector import KFold, Bootstrap
 from metrics import score
 import matplotlib.pyplot as plt
 import argparse
@@ -17,13 +17,13 @@ def restricted_float(x):
 parser = argparse.ArgumentParser(description='Evaluate Multinomial Bayes Classifier model.')
 parser.add_argument('--validation', choices=['kfold', 'bootstrap'], default='kfold')
 parser.add_argument('--nsplits', action="store", type=int, default = 10)
-parser.add_argument('--test_ratio', action="store", dest="test_ratio", type=restricted_float, default = 0.1)
+parser.add_argument('--train_ratio', action="store", type=restricted_float, default = 1)
 parser.add_argument('--random_seed', action="store", type=int, default = 1)
 parser.add_argument('--confusion_matrix', action='store_true')
 parser.add_argument('--normalize', action='store_true')
 
 # Sample run
-# python evaluate.py --validation bootstrap --nsplits 3 --test_ratio .2 --confusion_matrix
+# python evaluate.py --validation bootstrap --nsplits 3 --train_ratio .2 --confusion_matrix
 
 args = parser.parse_args()
 
@@ -53,7 +53,7 @@ classes = list(set(c for t, c in texts))
 model_selectors = { 
     'kfold': KFold(n_splits = args.nsplits if args.nsplits > 1 else 2, random_state = args.random_seed),
     # TODO: check if this is really bootstrap
-    'bootstrap': ShuffleSplit(n_splits = args.nsplits, test_size = args.test_ratio, random_state = args.random_seed)
+    'bootstrap': Bootstrap(n_splits = args.nsplits, train_size = args.train_ratio, random_state = args.random_seed)
 }
 
 model_selector = model_selectors[args.validation]
