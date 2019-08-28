@@ -12,7 +12,7 @@ def tokenize_document(document, *, grams_count = 1):
     document = document.translate(str.maketrans('', '', punctuation))
 
     # Get N_grams
-    n_grams = everygrams(document.split(' '), 1, grams_count)
+    n_grams = everygrams(document.split(' '), grams_count, grams_count)
     n_grams_str = [' '.join(filter(None, g)) for g in n_grams]
 
     return Counter(n_grams_str)

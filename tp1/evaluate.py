@@ -1,4 +1,5 @@
 import csv
+import os
 import numpy as np
 from collections import Counter
 from multinomial_bayes import MultinomialBayesClassifier
@@ -16,7 +17,9 @@ def restricted_float(x):
     
 parser = argparse.ArgumentParser(description='Evaluate Multinomial Bayes Classifier model.')
 parser.add_argument('--validation', choices=['kfold', 'bootstrap'], default='kfold')
+parser.add_argument('--dataset', choices=['aizemberg', 'reuters'], default='aizemberg')
 parser.add_argument('--nsplits', action="store", type=int, default = 10)
+parser.add_argument('--max_classes', action="store", type=int, default = -1)
 parser.add_argument('--train_ratio', action="store", type=restricted_float, default = 1)
 parser.add_argument('--random_seed', action="store", type=int, default = 1)
 parser.add_argument('--confusion_matrix', action='store_true')
@@ -27,19 +30,35 @@ parser.add_argument('--normalize', action='store_true')
 
 args = parser.parse_args()
 
-texts = []
-with open('aa_bayes.tsv') as tsvfile:
-    reader = csv.reader(tsvfile, delimiter = "\t")
-    next(reader)   # Skip header
-    i = 0
-    for row in reader:
-        if(len(row) > 3):
-            texts.append((row[1], row[3]))
+def authors(max_classes = -1):
+    texts = []
 
-texts = texts[:30000] # Remove Noticias Destacadas
+    authors = ["AaronPressman", "AlanCrosby", "AlexanderSmith", "BenjaminKangLim", "BernardHickey", "BradDorfman", "DarrenSchuettler", "DavidLawder", "EdnaFernandes", "EricAuchard", "FumikoFujisaki", "GrahamEarnshaw", "HeatherScoffield", "JaneMacartney", "JanLopatka", "JimGilchrist", "JoeOrtiz", "JohnMastrini", "JonathanBirt", "JoWinterbottom", "KarlPenhaul", "KeithWeir", "KevinDrawbaugh", "KevinMorrison", "KirstinRidley", "KouroshKarimkhany", "LydiaZajc", "LynneO'Donnell", "LynnleyBrowning", "MarcelMichelson", "MarkBendeich", "MartinWolk", "MatthewBunce", "MichaelConnor", "MureDickie", "NickLouth", "PatriciaCommins", "PeterHumphrey", "PierreTran", "RobinSidel", "RogerFillion", "SamuelPerry", "SarahDavison", "ScottHillis", "SimonCowell", "TanEeLyn", "TheresePoletti", "TimFarrand", "ToddNissen", "WilliamKazer"]
+    for author in authors[0:max_classes]:
+        for filename in os.listdir(f'editoriales/{author}'):
+            with open(f'editoriales/{author}/{filename}') as textos:
+                lines = [(line, author) for line in textos.readlines()]
+                texts.extend(lines[:-1])
+    return texts
+
+def headlines():
+    texts = []
+    with open('aa_bayes.tsv') as tsvfile:
+        reader = csv.reader(tsvfile, delimiter = "\t")
+        next(reader)   # Skip header
+        i = 0
+        for row in reader:
+            if(len(row) > 3):
+                texts.append((row[1], row[3]))
+
+    texts = texts[:30000] # Remove Noticias Destacadas
+    return texts
 
 universe = set()
 examples = []
+
+
+texts = headlines() if args.dataset == "aizemberg" else authors(args.max_classes)
 for text, klass in texts:
     histogram = basic_tokenize_document(text)
     universe.update(histogram.keys())

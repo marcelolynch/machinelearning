@@ -30,12 +30,12 @@ def score(classifier, test, classes, *, confusion_matrix = False, normalize = Fa
         # print('FN', FN)
         # print('FP', FP)
         
-        accuracy = (TP + TN)/(TP + FP + TN + FN)
-        precision = TP/(TP + FP)
-        recall = TP/(TP + FN)
-        f1 = (2 * precision * recall)/(precision + recall)
-        tp_rate = TP/(TP + FN)
-        fp_rate = FP/(FP + TN)
+        accuracy = (TP + TN)/(TP + FP + TN + FN) if (TP + FP + TN + FN) > 0 else -1
+        precision = TP/(TP + FP) if TP + FP > 0 else -1
+        recall = TP/(TP + FN) if TP + FN > 0 else -1
+        f1 = (2 * precision * recall)/(precision + recall) if precision + recall > 0 else -1
+        tp_rate = TP/(TP + FN) if TP + FN > 0 else -1
+        fp_rate = FP/(FP + TN) if TP + FN > 0 else -1
 
         print(f'Accuracy {accuracy:.5f} | Precision {precision:.5f} | Recall {recall:.5f} | TP-rate {tp_rate:.5f} | FP-rate {fp_rate:.5f} | F1 {f1:.5f} \n')
 
