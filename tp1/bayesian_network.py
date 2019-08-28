@@ -14,6 +14,9 @@ class DiscreteBayesianNetwork:
         variable_values = [self.variables[p] for p in self.parents_of[node]]
         return itertools.product(*variable_values)
 
+    def _set_probabilities(self, parent_probabilities):
+        self.parent_conditionals = parent_probabilities
+    
     def fit(self, examples):
         # examples :: [ node->value ]
         # Initialize the counters
@@ -115,4 +118,52 @@ def ejercicio4():
     print(dbn.calculate( { "admit": 1 }, conditions = { "rank": 2, "gre": 1, "gpa": 0 }))
 
 
+def ejercicio1():
+    dbn = DiscreteBayesianNetwork( {"Edad": ["V","J"], 
+                                    "G1": ["Si", "No"], 
+                                    "G2": ["Si", "No"], 
+                                    "G3": ["Si", "No"], 
+                                    "G4": ["Si", "No"]},
+                                    {
+                                        "Edad": [],
+                                        "G1": ["Edad"],
+                                        "G2": ["Edad"],
+                                        "G3": ["Edad"],
+                                        "G4": ["Edad"]
+                                    })
+    
+    conditional_probabilities = {
+        "Edad": { (): { "V": 0.9, "J": 0.1 } },
+        "G1": {
+            ("J",): { "Si": 0.95, "No": 0.05  },
+            ("V",): { "Si": 0.03, "No": 0.97  }
+        },
+        "G2": {
+            ("J",): { "Si": 0.05, "No": 0.95  },
+            ("V",): { "Si": 0.82, "No": 0.18  }
+        },
+        "G3": {
+            ("J",): { "Si": 0.02, "No": 0.98  },
+            ("V",): { "Si": 0.34, "No": 0.66  }
+        },
+        "G4": {
+            ("J",): { "Si": 0.2, "No": 0.8  },
+            ("V",): { "Si": 0.92, "No": 0.08  }
+        }
+    }
+    dbn._set_probabilities(conditional_probabilities)
+
+    # Ejercicio 4a
+    print("Probabilidad de ser joven dadas las preferencias:")
+    ej1a = dbn.calculate( { "Edad": "J" }, conditions = { "G1": "Si", "G2": "No", "G3": "Si", "G4":"No" })
+    print(ej1a)
+    print()
+    # Ejercicio 4b
+    print("Probabilidad de ser viejo dadas las preferencias:")
+    ej1b = dbn.calculate( { "Edad": "V" }, conditions = { "G1": "Si", "G2": "No", "G3": "Si", "G4":"No" })
+    print(ej1b)
+
+print("======== EJERCICIO 1 =============")
+ejercicio1()
+print("\n======== EJERCICIO 4 =============")
 ejercicio4()
