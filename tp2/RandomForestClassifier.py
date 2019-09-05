@@ -16,7 +16,7 @@ def gain(x, y, attr_i, metric_f):
     all_attr_values = x.T[attr_i]
     attr_values, attr_values_count = np.unique(all_attr_values, return_counts=True)
 
-    gain = metric_f(y)
+    gain = metric_apply(y, metric_f)
     total = len(y)
 
     for attr_value, attr_value_count in zip(attr_values, attr_values_count):
