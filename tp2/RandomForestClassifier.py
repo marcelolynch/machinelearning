@@ -20,7 +20,7 @@ def gain(x, y, attr_i):
         gain -= ((attr_value_count/total) * entropy(y[filtered_by_attribute]))
     return gain
 
-def max_information_attribute(x, y, usable_attrs, *, information_f):
+def max_information_attribute(x, y, usable_attrs, *, info_f):
     # Get index of attribute with maximun information function
     gains = []
     for i in usable_attrs:
@@ -29,7 +29,10 @@ def max_information_attribute(x, y, usable_attrs, *, information_f):
     
     return usable_attrs[np.argmax(gains)]
 
+INFORMATION_FUNCTIONS = { 'gain': gain }
+
 def create_decision_tree(x, y, usable_attrs = None, *, information_f):
+    info_f = INFORMATION_FUNCTIONS[information_f]
     x = np.array(x)
     y = np.array(y)
 
@@ -46,7 +49,7 @@ def create_decision_tree(x, y, usable_attrs = None, *, information_f):
         return DecisionTreeLeaf(y[0])
     
     # Get attribute with maximum information 
-    best_attr = max_information_attribute(x, y, usable_attrs, information_f = information_f)
+    best_attr = max_information_attribute(x, y, usable_attrs, info_f = info_f)
     print('Max gain attr: ', best_attr)
 
     usable_attrs = usable_attrs[usable_attrs != best_attr]
@@ -92,7 +95,22 @@ if __name__ == '__main__':
             [LLUVIOSO, TEMPLADO, ALTA, FUERTE],   
         ], 
         [NO, NO, SI, SI, SI, NO, SI, NO, SI, SI, SI, SI, SI, NO],
-        information_f = gain
+        information_f = 'gain'
     )
 
-    print(dot_string(tree, feature_names = ['PRONOSTICO', 'TEMPERATURA', 'HUMEDAD', 'VIENTO'], class_names=['NO', 'SI']))
+    print(dot_string(tree, feature_names = ['PRONOSTICO', 'TEMPERATURA', 'HUMEDAD', 'VIENTO'], feature_values = [
+        ['SOL', 'NUBLADO', 'LLUVIOSO'],
+        ['FRIO', 'TEMPLADO', 'CALIDO'],
+        ['ALTA', 'NORMAL'],
+        ['FUERTE', 'DEBIL']
+    ], class_names=['NO', 'SI']))
+
+
+# Poda
+# Mínimo de observaciones para dividir un nodo -> como está ahora se puede hacer
+# Máxima profundidad del árbol (vertical) -> pasar altura del árbol en la recursión
+# Máximo número de atributos a considerar para la ramificación -> como está ahora se puede hacer
+# Máximo número de nodos hoja -> ?
+# Gini < u -> ?
+#
+# Al expandir, etiquetar el nodo con la clase mas frecuente

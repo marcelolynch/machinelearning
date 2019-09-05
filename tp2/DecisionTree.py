@@ -20,10 +20,10 @@ class DecisionTreeLeaf(DecisionTree):
     def is_leaf(self):
         return True
 
-def dot_string(tree, *, feature_names, class_names):
-    return 'digraph G {\n'  + dot_string_rec('root', tree, feature_names = feature_names, class_names = class_names) + '}'
+def dot_string(tree, *, feature_names, feature_values, class_names):
+    return 'digraph G {\n'  + dot_string_rec('root', tree, feature_names = feature_names, feature_values = feature_values, class_names = class_names) + '}'
 
-def dot_string_rec(curr, tree, *, feature_names, class_names):
+def dot_string_rec(curr, tree, *, feature_names, feature_values, class_names):
     dot_str = ''
 
     if tree.is_leaf():
@@ -33,13 +33,14 @@ def dot_string_rec(curr, tree, *, feature_names, class_names):
         return f'    {curr} -> {node_name}\n    {node_name} [label="{klass}"]\n'
 
     f_name = feature_names[tree.attr]
+    value_names = feature_values[tree.attr]
     for attr_v, subtree in tree.children.items():
-        node_name = f'"{f_name}: {attr_v}"'
+        node_name = f'"{f_name}: {value_names[attr_v]}"'
         dot_str += f'    {curr} -> {node_name}\n'
 
     for attr_v, subtree in tree.children.items():
-        node_name = f'"{f_name}: {attr_v}"'
-        dot_str += dot_string_rec(node_name, subtree, feature_names = feature_names, class_names = class_names)
+        node_name = f'"{f_name}: {value_names[attr_v]}"'
+        dot_str += dot_string_rec(node_name, subtree, feature_names = feature_names, feature_values = feature_values, class_names = class_names)
 
     return dot_str
 
