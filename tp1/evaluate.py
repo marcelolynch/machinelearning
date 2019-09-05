@@ -43,7 +43,7 @@ def authors(max_classes = -1):
 
 def headlines():
     texts = []
-    with open('aa_bayes.tsv') as tsvfile:
+    with open('aa_bayes.tsv', encoding="utf8") as tsvfile:
         reader = csv.reader(tsvfile, delimiter = "\t")
         next(reader)   # Skip header
         i = 0

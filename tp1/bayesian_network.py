@@ -163,7 +163,7 @@ def ejercicio1():
     ej1b = dbn.calculate( { "Edad": "V" }, conditions = { "G1": "Si", "G2": "No", "G3": "Si", "G4":"No" })
     print(ej1b)
 
-print("======== EJERCICIO 1 =============")
+print("========== EJERCICIO 1 =============")
 ejercicio1()
 print("\n======== EJERCICIO 4 =============")
 ejercicio4()

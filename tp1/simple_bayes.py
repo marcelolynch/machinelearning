@@ -98,10 +98,10 @@ examples = [
     [1,1,0,0,1,"E"]
 ]
 
-#nbc = BinaryNaiveBayesClassifier(attrs)
-#nbc.train(examples)
-#nbc.fit()
-#print(nbc.predict([0,0,1,1,1]))
+nbc = BinaryNaiveBayesClassifier(attrs)
+nbc.train(examples)
+nbc.fit()
+print(nbc.predict([1,0,1,1,0]))
 
 # El ejemplo del ppt 
 # Tomo 'a' como verdadero y 'b' como falso
@@ -115,4 +115,4 @@ e2 = [
 nbc = BinaryNaiveBayesClassifier(['a1', 'a2', 'a3'])
 nbc.train(e2)
 nbc.fit()
-print(nbc.predict([1,1,1]))
+#print(nbc.predict([1,1,1]))
