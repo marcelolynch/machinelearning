@@ -3,40 +3,33 @@ from DecisionTree import DecisionTree, DecisionTreeLeaf, dot_string
 
 def entropy(klasses):
     _, unique_counts = np.unique(klasses, return_counts=True)
-    total = len(klasses)
-    H = 0
-    # TODO: capaz se puede hacer con magia de numpy
-    for c in unique_counts:
-        rel_freq = c/total
-        H -= (rel_freq * np.log2(rel_freq))
-    return H
+    rel_freqs = unique_counts / len(klasses)
+    return -np.sum(np.multiply(rel_freqs, np.log2(rel_freqs)))
 
-def max_gain_attribute(x, y, usable_attrs):
+# Mmmm tengo dudas de como hacer las otras funciones de información
+def gain(x, y, attr_i):
+    all_attr_values = x.T[attr_i]
+    attr_values, attr_values_count = np.unique(all_attr_values, return_counts=True)
+
+    gain = entropy(y)
     total = len(y)
+
+    for attr_value, attr_value_count in zip(attr_values, attr_values_count):
+        # print(f'Attribute value = {attr_value}. |Sattr=v| = {attr_value_count}')
+        filtered_by_attribute = np.where(all_attr_values == attr_value)
+        gain -= ((attr_value_count/total) * entropy(y[filtered_by_attribute]))
+    return gain
+
+def max_information_attribute(x, y, usable_attrs, *, information_f):
+    # Get index of attribute with maximun information function
     gains = []
-    # For each attribute, calculate gain
-    # TODO: information function as a parameter
-    H = entropy(y)
-    print('Entropy: ', H)
     for i in usable_attrs:
-        all_attr_values = x.T[i]
-
-        # Problema: me puede pasar que al hacer los cortes sobre las rows pierda los valores posibles de algun atributo.
-        # Que hacemos? Lo cargamos aparte? 
-        # Numericamente no cambia nada pero haría que no haya una rama del árbol de decisión en ese lugar? No, anda bien
-        attr_values, attr_values_count = np.unique(all_attr_values, return_counts=True)
-
-        gain = H
-        for attr_value, attr_value_count in zip(attr_values, attr_values_count):
-            # print(f'Attribute value = {attr_value}. |Sattr=v| = {attr_value_count}')
-            filtered_by_attribute = np.where(all_attr_values == attr_value)
-            gain -= ((attr_value_count/total) * entropy(y[filtered_by_attribute]))
-
-        gains.append(gain)
+        g = gain(x, y, i)
+        gains.append(g)
     
     return usable_attrs[np.argmax(gains)]
 
-def create_decision_tree(x, y, usable_attrs = None):
+def create_decision_tree(x, y, usable_attrs = None, *, information_f):
     x = np.array(x)
     y = np.array(y)
 
@@ -53,7 +46,7 @@ def create_decision_tree(x, y, usable_attrs = None):
         return DecisionTreeLeaf(y[0])
     
     # Get attribute with maximum information 
-    best_attr = max_gain_attribute(x, y, usable_attrs)
+    best_attr = max_information_attribute(x, y, usable_attrs, information_f = information_f)
     print('Max gain attr: ', best_attr)
 
     usable_attrs = usable_attrs[usable_attrs != best_attr]
@@ -62,13 +55,13 @@ def create_decision_tree(x, y, usable_attrs = None):
     all_attr_values = x.T[best_attr]
     attr_unique_values = np.unique(all_attr_values)
 
-    # Create children
+    # Create children -> subtrees slicing the dataset with the attribute that is set
     for v in attr_unique_values:
         # Only take rows where attr = v
         v_rows = np.where(all_attr_values == v)
         x_slice = x[v_rows]
         y_slice = y[v_rows]
-        children[v] = create_decision_tree(x_slice, y_slice, usable_attrs=usable_attrs)
+        children[v] = create_decision_tree(x_slice, y_slice, usable_attrs = usable_attrs, information_f = information_f)
     
     root = DecisionTree(best_attr, children=children)
     return root
@@ -98,7 +91,8 @@ if __name__ == '__main__':
             [NUBLADO, CALIDO, NORMAL, DEBIL],
             [LLUVIOSO, TEMPLADO, ALTA, FUERTE],   
         ], 
-        [NO, NO, SI, SI, SI, NO, SI, NO, SI, SI, SI, SI, SI, NO]
+        [NO, NO, SI, SI, SI, NO, SI, NO, SI, SI, SI, SI, SI, NO],
+        information_f = gain
     )
 
     print(dot_string(tree, feature_names = ['PRONOSTICO', 'TEMPERATURA', 'HUMEDAD', 'VIENTO'], class_names=['NO', 'SI']))
