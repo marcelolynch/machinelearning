@@ -1,38 +1,40 @@
 import numpy as np
 from DecisionTree import DecisionTree, DecisionTreeLeaf, dot_string
 
-def entropy(klasses):
+# Metric functions applied to frequency arrays
+ENTROPY = lambda fs: -sum([0 if f == 0 else f * np.log2(f) for f in fs])
+GINI_INDEX = lambda fs: 1 - sum([f*f for f in fs])
+METRIC_FUNCTIONS = { 'gain': ENTROPY, 'gini': GINI_INDEX }
+
+def metric_apply(klasses, metric_f):
     _, unique_counts = np.unique(klasses, return_counts=True)
     rel_freqs = unique_counts / len(klasses)
-    return -np.sum(np.multiply(rel_freqs, np.log2(rel_freqs)))
+    return metric_f(rel_freqs)
 
-# Mmmm tengo dudas de como hacer las otras funciones de información
-def gain(x, y, attr_i):
+def gain(x, y, attr_i, metric_f):
     all_attr_values = x.T[attr_i]
     attr_values, attr_values_count = np.unique(all_attr_values, return_counts=True)
 
-    gain = entropy(y)
+    gain = metric_f(y)
     total = len(y)
 
     for attr_value, attr_value_count in zip(attr_values, attr_values_count):
-        # print(f'Attribute value = {attr_value}. |Sattr=v| = {attr_value_count}')
         filtered_by_attribute = np.where(all_attr_values == attr_value)
-        gain -= ((attr_value_count/total) * entropy(y[filtered_by_attribute]))
+        gain -= ((attr_value_count/total) * metric_apply(y[filtered_by_attribute], metric_f))
     return gain
 
-def max_information_attribute(x, y, usable_attrs, *, info_f):
-    # Get index of attribute with maximun information function
+
+def max_gain_attribute(x, y, usable_attrs, *, metric_f):
+    # Get index of attribute with maximun gain given the metric
     gains = []
     for i in usable_attrs:
-        g = gain(x, y, i)
+        g = gain(x, y, i, metric_f)
         gains.append(g)
     
     return usable_attrs[np.argmax(gains)]
 
-INFORMATION_FUNCTIONS = { 'gain': gain }
-
-def create_decision_tree(x, y, usable_attrs = None, *, information_f):
-    info_f = INFORMATION_FUNCTIONS[information_f]
+def create_decision_tree(x, y, usable_attrs = None, *, metric_f_name):
+    metric_f = METRIC_FUNCTIONS[metric_f_name]
     x = np.array(x)
     y = np.array(y)
 
@@ -49,7 +51,7 @@ def create_decision_tree(x, y, usable_attrs = None, *, information_f):
         return DecisionTreeLeaf(y[0])
     
     # Get attribute with maximum information 
-    best_attr = max_information_attribute(x, y, usable_attrs, info_f = info_f)
+    best_attr = max_gain_attribute(x, y, usable_attrs, metric_f = metric_f)
     print('Max gain attr: ', best_attr)
 
     usable_attrs = usable_attrs[usable_attrs != best_attr]
@@ -64,7 +66,7 @@ def create_decision_tree(x, y, usable_attrs = None, *, information_f):
         v_rows = np.where(all_attr_values == v)
         x_slice = x[v_rows]
         y_slice = y[v_rows]
-        children[v] = create_decision_tree(x_slice, y_slice, usable_attrs = usable_attrs, information_f = information_f)
+        children[v] = create_decision_tree(x_slice, y_slice, usable_attrs = usable_attrs, metric_f_name = metric_f_name)
     
     root = DecisionTree(best_attr, children=children)
     return root
@@ -95,7 +97,7 @@ if __name__ == '__main__':
             [LLUVIOSO, TEMPLADO, ALTA, FUERTE],   
         ], 
         [NO, NO, SI, SI, SI, NO, SI, NO, SI, SI, SI, SI, SI, NO],
-        information_f = 'gain'
+        metric_f_name = 'gain'
     )
 
     print(dot_string(tree, feature_names = ['PRONOSTICO', 'TEMPERATURA', 'HUMEDAD', 'VIENTO'], feature_values = [
