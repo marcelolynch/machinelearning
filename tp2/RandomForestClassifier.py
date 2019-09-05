@@ -1,5 +1,6 @@
 import numpy as np
 from DecisionTree import DecisionTree, DecisionTreeLeaf, dot_string
+from metrics import score
 
 def entropy(klasses):
     _, unique_counts = np.unique(klasses, return_counts=True)
@@ -37,7 +38,7 @@ def create_decision_tree(x, y, usable_attrs = None, *, information_f):
     y = np.array(y)
 
     if x.shape[0] != y.shape[0]:
-        raise f"X and Y row count mismatch. X: {x.shape[0]} - Y: {y.shape[0]}"
+        raise ValueError(f"X and Y row count mismatch. X: {x.shape[0]} - Y: {y.shape[0]}")
 
     if usable_attrs is None:
         usable_attrs = np.arange(x.shape[1])
@@ -77,26 +78,26 @@ if __name__ == '__main__':
     FUERTE, DEBIL = 0, 1
     NO, SI = 0, 1
 
-    tree = create_decision_tree(
-        [
-            [SOL, CALIDO, ALTA, DEBIL], 
-            [SOL, CALIDO, ALTA, FUERTE], 
-            [NUBLADO, CALIDO, ALTA, DEBIL],
-            [LLUVIOSO, TEMPLADO, ALTA, DEBIL],
-            [LLUVIOSO, FRIO, NORMAL, DEBIL],
-            [LLUVIOSO, FRIO, NORMAL, FUERTE],
-            [NUBLADO, FRIO, NORMAL, FUERTE],
-            [SOL, TEMPLADO, ALTA, DEBIL],     
-            [SOL, FRIO, NORMAL, DEBIL], 
-            [LLUVIOSO, TEMPLADO, NORMAL, DEBIL], 
-            [SOL, TEMPLADO, NORMAL, FUERTE], 
-            [NUBLADO, TEMPLADO, ALTA, FUERTE],
-            [NUBLADO, CALIDO, NORMAL, DEBIL],
-            [LLUVIOSO, TEMPLADO, ALTA, FUERTE],   
-        ], 
-        [NO, NO, SI, SI, SI, NO, SI, NO, SI, SI, SI, SI, SI, NO],
-        information_f = 'gain'
-    )
+    train_x = [
+        [SOL, CALIDO, ALTA, DEBIL], 
+        [SOL, CALIDO, ALTA, FUERTE], 
+        [NUBLADO, CALIDO, ALTA, DEBIL],
+        [LLUVIOSO, TEMPLADO, ALTA, DEBIL],
+        [LLUVIOSO, FRIO, NORMAL, DEBIL],
+        [LLUVIOSO, FRIO, NORMAL, FUERTE],
+        [NUBLADO, FRIO, NORMAL, FUERTE],
+        [SOL, TEMPLADO, ALTA, DEBIL],     
+        [SOL, FRIO, NORMAL, DEBIL], 
+        [LLUVIOSO, TEMPLADO, NORMAL, DEBIL], 
+        [SOL, TEMPLADO, NORMAL, FUERTE], 
+        [NUBLADO, TEMPLADO, ALTA, FUERTE],
+        [NUBLADO, CALIDO, NORMAL, DEBIL],
+        [LLUVIOSO, TEMPLADO, ALTA, FUERTE],   
+    ]
+
+    train_y = [NO, NO, SI, SI, SI, NO, SI, NO, SI, SI, SI, SI, SI, NO]
+
+    tree = create_decision_tree(x = train_x, y = train_y, information_f = 'gain')
 
     print(dot_string(tree, feature_names = ['PRONOSTICO', 'TEMPERATURA', 'HUMEDAD', 'VIENTO'], feature_values = [
         ['SOL', 'NUBLADO', 'LLUVIOSO'],
@@ -104,6 +105,8 @@ if __name__ == '__main__':
         ['ALTA', 'NORMAL'],
         ['FUERTE', 'DEBIL']
     ], class_names=['NO', 'SI']))
+
+    score(tree, train_x, train_y, ['NO', 'SI'], confusion_matrix=True)
 
 
 # Poda
