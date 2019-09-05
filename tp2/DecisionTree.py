@@ -1,27 +1,3 @@
-def dot_string(tree, *, feature_names, class_names):
-    return dot_string_rec('root', tree, feature_names = feature_names, class_names = class_names)
-
-def dot_string_rec(curr, tree, *, feature_names, class_names):
-    dot_str = ''
-
-    if tree.is_leaf():
-        klass = class_names[tree.leaf_value]
-        c = curr.replace('"', '')
-        node_name = f'"{c}+{klass}"'
-        return f'{curr} -> {node_name}\n {node_name} [label="{klass}"]\n'
-
-    f_name = feature_names[tree.attr]
-    for attr_v, subtree in tree.children.items():
-        node_name = f'"{f_name}: {attr_v}"'
-        dot_str += f'{curr} -> {node_name}\n'
-
-    for attr_v, subtree in tree.children.items():
-        node_name = f'"{f_name}: {attr_v}"'
-        dot_str += dot_string_rec(node_name, subtree, feature_names = feature_names, class_names = class_names)
-
-    return dot_str
-    # print(dot_str)
-
 class DecisionTree():
     def __init__(self, attr, *, children = {}):
         self.attr = attr
@@ -43,6 +19,29 @@ class DecisionTreeLeaf(DecisionTree):
 
     def is_leaf(self):
         return True
+
+def dot_string(tree, *, feature_names, class_names):
+    return 'digraph G {\n'  + dot_string_rec('root', tree, feature_names = feature_names, class_names = class_names) + '}'
+
+def dot_string_rec(curr, tree, *, feature_names, class_names):
+    dot_str = ''
+
+    if tree.is_leaf():
+        klass = class_names[tree.leaf_value]
+        c = curr.replace('"', '')
+        node_name = f'"{c}+{klass}"'
+        return f'    {curr} -> {node_name}\n    {node_name} [label="{klass}"]\n'
+
+    f_name = feature_names[tree.attr]
+    for attr_v, subtree in tree.children.items():
+        node_name = f'"{f_name}: {attr_v}"'
+        dot_str += f'    {curr} -> {node_name}\n'
+
+    for attr_v, subtree in tree.children.items():
+        node_name = f'"{f_name}: {attr_v}"'
+        dot_str += dot_string_rec(node_name, subtree, feature_names = feature_names, class_names = class_names)
+
+    return dot_str
 
 if __name__ == '__main__':
     leaf_1 = DecisionTreeLeaf(1) # YES

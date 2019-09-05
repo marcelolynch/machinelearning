@@ -1,4 +1,3 @@
-# TODO: rename file 
 import numpy as np
 from DecisionTree import DecisionTree, DecisionTreeLeaf, dot_string
 
@@ -16,7 +15,7 @@ def max_gain_attribute(x, y, usable_attrs):
     total = len(y)
     gains = []
     # For each attribute, calculate gain
-    # TODO: information function
+    # TODO: information function as a parameter
     H = entropy(y)
     print('Entropy: ', H)
     for i in usable_attrs:
@@ -27,7 +26,7 @@ def max_gain_attribute(x, y, usable_attrs):
         # Numericamente no cambia nada pero haría que no haya una rama del árbol de decisión en ese lugar? No, anda bien
         attr_values, attr_values_count = np.unique(all_attr_values, return_counts=True)
 
-        gain = H # TODO: nombre???
+        gain = H
         for attr_value, attr_value_count in zip(attr_values, attr_values_count):
             # print(f'Attribute value = {attr_value}. |Sattr=v| = {attr_value_count}')
             filtered_by_attribute = np.where(all_attr_values == attr_value)
@@ -37,17 +36,19 @@ def max_gain_attribute(x, y, usable_attrs):
     
     return usable_attrs[np.argmax(gains)]
 
-def create_decision_tree(x, y):
-    #TODO: check sizes match
+def create_decision_tree(x, y, usable_attrs = None):
     x = np.array(x)
     y = np.array(y)
-    all_attrs = np.array(list(range(x.shape[1]))) # Wat
-    return create_decision_subtree(x, y, all_attrs)
 
-    
-def create_decision_subtree(x, y, usable_attrs):
-    print('Usable attrs: ', usable_attrs)
+    if x.shape[0] != y.shape[0]:
+        raise f"X and Y row count mismatch. X: {x.shape[0]} - Y: {y.shape[0]}"
 
+    if usable_attrs is None:
+        usable_attrs = np.arange(x.shape[1])
+
+    # print('Usable attrs: ', usable_attrs)
+
+    # If there is only one class in the set, create a leaf node with that class.
     if len(np.unique(y)) == 1:
         return DecisionTreeLeaf(y[0])
     
@@ -67,11 +68,9 @@ def create_decision_subtree(x, y, usable_attrs):
         v_rows = np.where(all_attr_values == v)
         x_slice = x[v_rows]
         y_slice = y[v_rows]
-        children[v] = create_decision_subtree(x_slice, y_slice, usable_attrs=usable_attrs)
+        children[v] = create_decision_tree(x_slice, y_slice, usable_attrs=usable_attrs)
     
-    # Create tree with that attribute as root
     root = DecisionTree(best_attr, children=children)
-
     return root
 
 if __name__ == '__main__':
