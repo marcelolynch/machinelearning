@@ -2,9 +2,13 @@ import numpy as np
 from heapq import heappush, heappop
 
 EUCLIDEAN_DISTANCE = lambda a, b: np.linalg.norm(a - b)
+MANHATTAN_DISTANCE = lambda a, b: sum(np.abs(a - b))
 
-# Tengo dudas de como hacer (si es que lo queremos hacer porque aporta poco) el tema de KNN no pesado
-DISTANCE_FUNCTIONS = { 'euclidean': EUCLIDEAN_DISTANCE }
+# Sino podemos poner que siempre use la distancia de Minkowski y pasamos q como parámetro
+# https://www.saedsayad.com/k_nearest_neighbors.htm
+# Interesante también ver el tema de distancia de Hamming para cuando las variables son categóricas
+
+DISTANCE_FUNCTIONS = { 'euclidean': EUCLIDEAN_DISTANCE, 'manhattan': MANHATTAN_DISTANCE }
 
 class KNNClassifier():
     def __init__(self, *, K, distance_f = 'euclidean'):
@@ -27,6 +31,7 @@ class KNNClassifier():
             self.train_x = np.append(self.train_x, x, axis=0)
             self.train_y = np.append(self.train_y, y)
 
+    # TODO: cell-index method si nos da la gana
     def predict(self, x_i):
         if len(self.train_x) < self.K:
             raise ValueError(f'Cannot make a prediction with less than K examples ({len(self.train_x)}) in the training set')
