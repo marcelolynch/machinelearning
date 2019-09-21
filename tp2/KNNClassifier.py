@@ -58,13 +58,28 @@ class KNNClassifier():
             if klass not in class_sums:
                 class_sums[klass] = 0 
             
+            if negative_dist == 0:
+                return klass
+
             class_sums[klass] += 1/(-negative_dist)
 
         print(class_sums)
         return max(class_sums, key=class_sums.get)
 
-# TODO: TEST!
-knnc = KNNClassifier(K = 3)
-knnc.train([[0, 0.1], [0.3, 0.1], [0.1, 0.2], [1, 1], [2, 1], [0, 3]], [1, 0, 1, 4, 5, 3])
-p = knnc.predict([0.2, 0.2])
-print(p)
+# Crude example
+# from sklearn import datasets
+# from random import shuffle
+# iris = datasets.load_iris()
+# indexes = np.arange(len(iris.data))
+# np.random.shuffle(indexes)
+
+# x = iris.data[indexes]
+# y = iris.target[indexes]
+
+# knnc = KNNClassifier(K = 100)
+
+# knnc.train(x[:100], y[:100])
+
+# GUESS_I = 134
+# p = knnc.predict(x[GUESS_I])
+# print(f'Prediction: {p}, Actual value: {y[GUESS_I]}')
