@@ -8,14 +8,24 @@ MANHATTAN_DISTANCE = lambda a, b: sum(np.abs(a - b))
 # https://www.saedsayad.com/k_nearest_neighbors.htm
 # Interesante también ver el tema de distancia de Hamming para cuando las variables son categóricas
 
-DISTANCE_FUNCTIONS = { 'euclidean': EUCLIDEAN_DISTANCE, 'manhattan': MANHATTAN_DISTANCE, 'one': lambda a, b: 1 }
+DISTANCE_FUNCTIONS = { 
+    'euclidean': EUCLIDEAN_DISTANCE, 
+    'manhattan': MANHATTAN_DISTANCE, 
+}
+
+WEIGHT_FUNCTIONS = { 
+    'constant': lambda a, b: 1, 
+    'euclidean': lambda a, b: 1/(EUCLIDEAN_DISTANCE(a, b)),  
+    'manhattan': lambda a, b: 1/(MANHATTAN_DISTANCE(a, b))
+}
 
 class KNNClassifier():
-    def __init__(self, *, K, distance_f = 'euclidean'):
+    def __init__(self, *, K, distance_f = 'euclidean', weight_f = 'euclidean'):
         self.K = K
         self.train_x = None
         self.train_y = None
         self.distance_f = DISTANCE_FUNCTIONS[distance_f]
+        self.weight_f = WEIGHT_FUNCTIONS[weight_f]
 
     def train(self, x, y):
         if len(x) != len(y):
@@ -51,21 +61,21 @@ class KNNClassifier():
             heappush(k_nearest, (-self.distance_f(x_i, x_j), j))
             heappop(k_nearest)
 
-        class_sums = {}
+        class_weighted_sums = {}
         # K examples remaining are the nearest ones to the input vector
         for negative_dist, i in k_nearest:
             klass = self.train_y[i]
-            if klass not in class_sums:
-                class_sums[klass] = 0 
+            if klass not in class_weighted_sums:
+                class_weighted_sums[klass] = 0 
             
             # Return immediately if vector is the same as one in the train set
             if negative_dist == 0:
                 return klass
 
-            class_sums[klass] += 1/(-negative_dist)
+            class_weighted_sums[klass] += self.weight_f(x_i, self.train_x[i])
 
-        # print(class_sums)
-        return max(class_sums, key=class_sums.get)
+        print(class_weighted_sums)
+        return max(class_weighted_sums, key=class_weighted_sums.get)
 
 # Crude example
 # from sklearn import datasets
