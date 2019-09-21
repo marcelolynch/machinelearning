@@ -58,6 +58,7 @@ class KNNClassifier():
             if klass not in class_sums:
                 class_sums[klass] = 0 
             
+            # Return immediately if vector is the same as one in the train set
             if negative_dist == 0:
                 return klass
 
