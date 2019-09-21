@@ -1,6 +1,7 @@
 import numpy as np
+from collections import Counter
 from DecisionTree import DecisionTree, DecisionTreeLeaf, dot_string
-from metrics import score
+from metrics import score, accuracies
 
 # Metric functions applied to frequency arrays
 ENTROPY = lambda fs: -sum([0 if f == 0 else f * np.log2(f) for f in fs])
@@ -34,9 +35,10 @@ def max_gain_attribute(x, y, usable_attrs, *, metric_f):
     
     return usable_attrs[np.argmax(gains)]
 
-def create_decision_tree(x, y, usable_attrs = None, *, metric_f_name):
+def create_decision_tree(x, y, usable_attrs = None, *, metric_f_name, max_iterations = 600000):
     metric_f = METRIC_FUNCTIONS[metric_f_name]
     x = np.array(x)
+
     y = np.array(y)
 
     if x.shape[0] != y.shape[0]:
@@ -45,31 +47,45 @@ def create_decision_tree(x, y, usable_attrs = None, *, metric_f_name):
     if usable_attrs is None:
         usable_attrs = np.arange(x.shape[1])
 
-    # print('Usable attrs: ', usable_attrs)
-
     # If there is only one class in the set, create a leaf node with that class.
     if len(np.unique(y)) == 1:
         return DecisionTreeLeaf(y[0])
+
     
+    best_class, _ = Counter(y).most_common(1)[0]
+    # If we are out of iterations, create a leaf node with the most 
+    # frequent class at this point
+    max_iterations -= 1 
+    if max_iterations == 0:
+        return DecisionTreeLeaf(best_class)
+    
+    if len(usable_attrs) == 0:  # Can't divide any further
+        return DecisionTreeLeaf(best_class)
+
+
     # Get attribute with maximum information 
     best_attr = max_gain_attribute(x, y, usable_attrs, metric_f = metric_f)
-    print('Max gain attr: ', best_attr)
+
+    #print('Max gain attr: ', best_attr)
 
     usable_attrs = usable_attrs[usable_attrs != best_attr]
-    
+
     children = {}
     all_attr_values = x.T[best_attr]
     attr_unique_values = np.unique(all_attr_values)
 
     # Create children -> subtrees slicing the dataset with the attribute that is set
     for v in attr_unique_values:
+        max_iterations -= 1
+        max_iterations = max(max_iterations, 1) # Le dejo hacer una mas
         # Only take rows where attr = v
         v_rows = np.where(all_attr_values == v)
         x_slice = x[v_rows]
         y_slice = y[v_rows]
-        children[v] = create_decision_tree(x_slice, y_slice, usable_attrs = usable_attrs, metric_f_name = metric_f_name)
+        children[v] = create_decision_tree(x_slice, y_slice, usable_attrs = usable_attrs, metric_f_name = metric_f_name, max_iterations=max_iterations)
     
-    root = DecisionTree(best_attr, children=children)
+
+    root = DecisionTree(best_attr, best_class, children=children)
     return root
 
 if __name__ == '__main__':
@@ -116,6 +132,3 @@ if __name__ == '__main__':
 # Máxima profundidad del árbol (vertical) -> pasar altura del árbol en la recursión
 # Máximo número de atributos a considerar para la ramificación -> como está ahora se puede hacer
 # Máximo número de nodos hoja -> ?
-# Gini < u -> ?
-#
-# Al expandir, etiquetar el nodo con la clase mas frecuente
