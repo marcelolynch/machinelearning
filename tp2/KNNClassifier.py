@@ -8,7 +8,7 @@ MANHATTAN_DISTANCE = lambda a, b: sum(np.abs(a - b))
 # https://www.saedsayad.com/k_nearest_neighbors.htm
 # Interesante también ver el tema de distancia de Hamming para cuando las variables son categóricas
 
-DISTANCE_FUNCTIONS = { 'euclidean': EUCLIDEAN_DISTANCE, 'manhattan': MANHATTAN_DISTANCE }
+DISTANCE_FUNCTIONS = { 'euclidean': EUCLIDEAN_DISTANCE, 'manhattan': MANHATTAN_DISTANCE, 'one': lambda a, b: 1 }
 
 class KNNClassifier():
     def __init__(self, *, K, distance_f = 'euclidean'):
@@ -64,7 +64,7 @@ class KNNClassifier():
 
             class_sums[klass] += 1/(-negative_dist)
 
-        print(class_sums)
+        # print(class_sums)
         return max(class_sums, key=class_sums.get)
 
 # Crude example
