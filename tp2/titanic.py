@@ -5,11 +5,11 @@ from metrics import score, accuracies
 import matplotlib.pyplot as plt
 from graphviz import Source
 
-def get_data(filename, attributes):
+def get_data(filename, separator, attributes):
     lines = []
     uniq_values = [set() for _ in attributes]
     with open(filename, encoding="utf8") as f:
-        reader = csv.reader(f, delimiter = ",")
+        reader = csv.reader(f, delimiter = separator)
         next(reader)   # Skip header
         for row in reader:
             e = []
