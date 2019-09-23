@@ -20,14 +20,14 @@ WEIGHT_FUNCTIONS = {
 }
 
 class KNNClassifier():
-    def __init__(self, *, K, distance_f = 'euclidean', weight_f = 'euclidean'):
+    def __init__(self, *, K, distance_f = 'euclidean', weight_f = 'constant'):
         self.K = K
         self.train_x = None
         self.train_y = None
         self.distance_f = DISTANCE_FUNCTIONS[distance_f]
         self.weight_f = WEIGHT_FUNCTIONS[weight_f]
 
-    def train(self, x, y):
+    def fit(self, x, y):
         if len(x) != len(y):
             raise ValueError(f'Sizes of x ({len(x)}) and y ({len(y)}) mismatch')
         
@@ -74,7 +74,7 @@ class KNNClassifier():
 
             class_weighted_sums[klass] += self.weight_f(x_i, self.train_x[i])
 
-        print(class_weighted_sums)
+        # print(class_weighted_sums)
         return max(class_weighted_sums, key=class_weighted_sums.get)
 
 # Crude example

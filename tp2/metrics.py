@@ -20,10 +20,10 @@ def score(classifier, test_x, test_y, classes, *, confusion_matrix = False, norm
     for i, klass in enumerate(classes):
         print(f'* Class: {klass}')
 
-        TP = true_positives(i, y_pred, y_true)
-        TN = true_negatives(i, y_pred, y_true)
-        FN = false_negatives(i, y_pred, y_true)
-        FP = false_positives(i, y_pred, y_true)
+        TP = true_positives(klass, y_pred, y_true)
+        TN = true_negatives(klass, y_pred, y_true)
+        FN = false_negatives(klass, y_pred, y_true)
+        FP = false_positives(klass, y_pred, y_true)
 
         # print('TP', TP)
         # print('TN', TN)
@@ -87,11 +87,11 @@ def false_negatives(c, y_pred, y_true):
 def calculate_confusion_matrix(y_true, y_pred):
     classes = np.unique(y_true)
     cm = np.zeros((len(classes), len(classes)), dtype=int)
-    for tl in classes:
+    for i, tl in enumerate(classes):
         true_ind = np.where(y_true == tl)
         pred = y_pred[true_ind]
-        for pl in classes:
-            cm[tl, pl] = np.count_nonzero(pred == pl)
+        for j, pl in enumerate(classes):
+            cm[i, j] = np.count_nonzero(pred == pl)
 
     return cm
 
