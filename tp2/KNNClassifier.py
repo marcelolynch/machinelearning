@@ -15,8 +15,8 @@ DISTANCE_FUNCTIONS = {
 
 WEIGHT_FUNCTIONS = { 
     'constant': lambda a, b: 1, 
-    'euclidean': lambda a, b: 1/(EUCLIDEAN_DISTANCE(a, b)),  
-    'manhattan': lambda a, b: 1/(MANHATTAN_DISTANCE(a, b))
+    'euclidean': lambda a, b: 1/(EUCLIDEAN_DISTANCE(a, b)**2),  
+    'manhattan': lambda a, b: 1/(MANHATTAN_DISTANCE(a, b)**2)
 }
 
 class KNNClassifier():
