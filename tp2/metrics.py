@@ -17,7 +17,7 @@ def score(classifier, test_x, test_y, classes, *, confusion_matrix = False, norm
     y_pred = np.array([classifier.predict(np.array(ex)) for ex in test_x])
 
     accuracies, precisions, recalls, f1s, tp_rates, fp_rates = [], [], [], [], [], []
-    for i, klass in enumerate(classes):
+    for klass in classes:
         print(f'* Class: {klass}')
 
         TP = true_positives(klass, y_pred, y_true)
@@ -32,10 +32,10 @@ def score(classifier, test_x, test_y, classes, *, confusion_matrix = False, norm
         
         accuracy = (TP + TN)/(TP + FP + TN + FN)
         precision = TP/(TP + FP)
-        recall = TP/(TP + FN)
-        f1 = (2 * precision * recall)/(precision + recall)
-        tp_rate = TP/(TP + FN)
-        fp_rate = FP/(FP + TN)
+        recall = TP/(TP + FN) if TP + FN > 0 else 0
+        f1 = (2 * precision * recall)/(precision + recall) if precision + recall > 0 else 0
+        tp_rate = TP/(TP + FN) if TP + FN > 0 else 0
+        fp_rate = FP/(FP + TN) if TP + FN > 0 else 0
 
         print(f'Accuracy {accuracy:.5f} | Precision {precision:.5f} | Recall {recall:.5f} | TP-rate {tp_rate:.5f} | FP-rate {fp_rate:.5f} | F1 {f1:.5f} \n')
 
@@ -64,6 +64,41 @@ def score(classifier, test_x, test_y, classes, *, confusion_matrix = False, norm
 
         plt.show()
 
+
+def confusion_matrix(classifier, x, y, classes, normalize = False):
+    x = np.array(x)
+    y = np.array(y)
+
+    y_true = y
+    y_pred = np.array([classifier.predict(np.array(x_i)) for x_i in x])
+    title = 'Normalized confusion matrix' if normalize else 'Confusion matrix'
+    plot_confusion_matrix(y_true, y_pred, classes=classes, normalize=normalize, title=title)
+
+
+
+def accuracies(ts, test_x, test_y, classes):
+    sizes = [t.size() for t in ts]
+    accuracies = []
+
+    for t in ts:
+        TP = 0
+        TN = 0
+        FN = 0
+        FP = 0
+
+        y_true = np.array(test_y)
+        y_pred = np.array([t.predict(np.array(ex)) for ex in test_x])
+        for i in classes:
+            TP += true_positives(i, y_pred, y_true)
+            TN += true_negatives(i, y_pred, y_true)
+            FN += false_negatives(i, y_pred, y_true)
+            FP += false_positives(i, y_pred, y_true)
+       
+        accuracies.append((TP + TN)/(TP + FP + TN + FN))
+
+    return sizes, accuracies
+
+
 def true_positives(c, y_pred, y_true):
     t_indexes = np.where(y_true == c)
     tp = np.count_nonzero(y_pred[t_indexes] == c)
@@ -87,7 +122,7 @@ def false_negatives(c, y_pred, y_true):
 def calculate_confusion_matrix(y_true, y_pred):
     classes = np.unique(y_true)
     cm = np.zeros((len(classes), len(classes)), dtype=int)
-    for i, tl in enumerate(classes):
+    for i,tl in enumerate(classes):
         true_ind = np.where(y_true == tl)
         pred = y_pred[true_ind]
         for j, pl in enumerate(classes):
