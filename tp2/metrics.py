@@ -46,16 +46,19 @@ def score(classifier, test_x, test_y, classes, *, confusion_matrix = False, norm
         tp_rates.append(tp_rate)
         fp_rates.append(fp_rate)
 
-    print('HARMONIC MEANS\n')
-    print(f'    Accuracy: {hmean(accuracies):.5f}')
-    print(f'    Precision: {hmean(precisions):.5f}')
-    print(f'    Recall: {hmean(recalls):.5f}')
-    print(f'    TP rate: {hmean(tp_rates):.5f}')
-    if np.sum(fp_rates) > 0:
-        print(f'    FP rate: {hmean(fp_rates):.5f}')
-    else:
-        print(f'    FP rate: {0:.5f}')
-    print(f'    F1 score: {hmean(f1s):.5f}')
+    try:
+        print('HARMONIC MEANS\n')
+        print(f'    Accuracy: {hmean(accuracies):.5f}')
+        print(f'    Precision: {hmean(precisions):.5f}')
+        print(f'    Recall: {hmean(recalls):.5f}')
+        print(f'    TP rate: {hmean(tp_rates):.5f}')
+        if np.sum(fp_rates) > 0:
+            print(f'    FP rate: {hmean(fp_rates):.5f}')
+        else:
+            print(f'    FP rate: {0:.5f}')
+        print(f'    F1 score: {hmean(f1s):.5f}')
+    except:
+        pass
 
     if confusion_matrix:
         # Plot confusion matrix
