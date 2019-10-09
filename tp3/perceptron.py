@@ -4,9 +4,12 @@ class Perceptron:
     def __init__(self, no_of_inputs, learning_rate = 0.01):
         self.learning_rate = learning_rate
         self.weights = (-1 + (2 * np.random.rand(no_of_inputs + 1))) * 0.1
-           
+
+    def get_weighted_output(self, inputs):
+        return np.dot(inputs, self.weights[1:]) + self.weights[0]
+
     def predict(self, inputs):
-        return np.sign(np.dot(inputs, self.weights[1:]) + self.weights[0])
+        return np.sign(self.get_weighted_output(inputs))
 
     def train(self, x, y, threshold=-1):
         errors = 1
