@@ -18,7 +18,8 @@ def recalculate_assignments(X, centroids):
     return assignments
 
 
-def kmeans(X, k):
+def kmeans(X_wrapped, k, vector_sel = lambda x: x):
+    X = [vector_sel(x) for x in X_wrapped] # should return a real vector 
     size = len(X)
     assignments = [randint(0,k-1) for _ in range(size)] # Initial assignment -- random
     loop = True
@@ -28,7 +29,7 @@ def kmeans(X, k):
         centroids = [centroid(g) for g in groups]
         assignments = recalculate_assignments(X, centroids)
         loop = any(map(lambda pair: pair[0] != pair[1] , zip(assignments, assignments_prev))) # Loop if anything changed
-    return list(zip(X, assignments))
+    return list(zip(X_wrapped, assignments))
 
 
     
