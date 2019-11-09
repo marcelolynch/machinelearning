@@ -22,13 +22,12 @@ def kmeans(X_wrapped, k, vector_sel = lambda x: x):
     X = [vector_sel(x) for x in X_wrapped] # should return a real vector 
     size = len(X)
     assignments = [randint(0,k-1) for _ in range(size)] # Initial assignment -- random
-    loop = True
-    while loop:
+    assignments_prev = None
+    while assignments != assignments_prev:
         assignments_prev = assignments
         groups = group_examples(X, assignments, k)
         centroids = [centroid(g) for g in groups]
         assignments = recalculate_assignments(X, centroids)
-        loop = any(map(lambda pair: pair[0] != pair[1] , zip(assignments, assignments_prev))) # Loop if anything changed
     return list(zip(X_wrapped, assignments))
 
 
