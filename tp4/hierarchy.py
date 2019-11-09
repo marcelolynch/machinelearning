@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 
 def create_cluster_hierarchy(xs, distance_measure = 'complete_link'):
   clusters = [Cluster([x_i], order=i) for i, x_i in enumerate(xs)]
@@ -26,12 +27,12 @@ def create_cluster_hierarchy(xs, distance_measure = 'complete_link'):
   # We end with just one cluster resulting from merging all the others sequentially
   return clusters[0]
 
-
+# TODO: así usa la distancia euclidea. Ver si queremos alguna otra (parametrizada)
 DISTANCE_MEASURES = {
-  'complete_link': lambda a, b:  np.max(abs(a-b)),
-  'single_link': lambda a, b: np.min(abs(a-b)),
-  'average_link': lambda a, b: np.mean(abs(a-b)),
-  'centroid': lambda a, b: abs(np.mean(a, axis=0)-np.mean(b, axis=0)),
+  'complete_link': lambda a, b:  np.amax(cdist(a, b)),
+  'single_link': lambda a, b: np.amin(cdist(a, b)),
+  'average_link': lambda a, b: np.amean(cdist(a, b)),
+  'centroid': lambda a, b: cdist([np.mean(a, axis=0)], [np.mean(b, axis=0)]),
 }
 
 class HierarchicalClassifier():
@@ -73,7 +74,7 @@ class Cluster():
       self.right_cluster = right_cluster
       self.cluster_distance = cluster_distance
 
-    self.elems = np.array(elems) # TODO: normalización
+    self.elems = np.array(elems)
     self.order = order
 
   def is_leaf(self):
@@ -109,8 +110,10 @@ def get_linkage_matrix(cluster):
 
 # Sample usage
 # HC = HierarchicalClassifier(distance_measure='single_link')
-# HC.fit([[1, 2, 3], [3, 2, 5], [4, 5, 7], [4, 6, 7], [40, 60, 70]])
 
+# print(DISTANCE_MEASURES['single_link'](a, b))
+# print(np.mean(a, axis=0))
+# print(np.mean(b, axis=0))
 # print('prediction', HC.predict([[1, 2, 3], [3, 3, 5], [40, 50, 30], [4, 6, 6]], 3))
 # Z = get_linkage_matrix(HC.cluster)
 # print('--- Z ---')
