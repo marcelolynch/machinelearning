@@ -39,6 +39,9 @@ class HierarchicalClassifier():
   def __init__(self, distance_measure = 'complete_link'):
     self.distance_measure = distance_measure
 
+  def linkage_matrix(self):
+      return get_linkage_matrix(self.cluster)
+
   def fit(self, xs):
     self.cluster = create_cluster_hierarchy(xs, distance_measure = self.distance_measure)
 
@@ -85,28 +88,35 @@ class Cluster():
 
   def distance_to_sample(self, elem, measure):
     return DISTANCE_MEASURES[measure](self.elems, [elem])
+  
 
   def __repr__(self):
     return f"C: {str(self.elems)} - cl_dist: {self.cluster_distance}"
 
 
+def flatten(cluster):
+    if(cluster.is_leaf()):
+        return []
+    return [cluster] + flatten(cluster.left_cluster) + flatten(cluster.right_cluster)    
+    
+def count_leafs(cluster):
+    if(cluster.is_leaf()):
+        return 1
+    return count_leafs(cluster.left_cluster) + count_leafs(cluster.right_cluster)    
+    
+
 # Returns a matrix with the format that matplot wants to draw the dendrogram
 def get_linkage_matrix(cluster):
-  Z = []
-  clusters = [cluster]
-  while (len(clusters) > 0):
-    new_clusters = []
-    for c in clusters:
+  clusters = flatten(cluster)
+  n = count_leafs(cluster)
+  Z = np.zeros((n - 1, 4))
+  
+  for c in clusters:
       row = np.array([c.left_cluster.order, c.right_cluster.order, c.cluster_distance + 1, 1], dtype=np.float)
-      Z.append(row)
+      Z[c.order - n] = row
 
-      if not c.left_cluster.is_leaf():
-        new_clusters.append(c.left_cluster)
-      if not c.right_cluster.is_leaf():
-        new_clusters.append(c.right_cluster)
-    
-    clusters = new_clusters
-  return np.array(sorted(Z, key = lambda r: r[2]))
+  return np.array(Z)
+#  return np.array(sorted(Z, key = lambda r: r[0]))
 
 # Sample usage
 # HC = HierarchicalClassifier(distance_measure='single_link')
