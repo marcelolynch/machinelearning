@@ -112,7 +112,7 @@ def get_linkage_matrix(cluster):
   Z = np.zeros((n - 1, 4))
   
   for c in clusters:
-      row = np.array([c.left_cluster.order, c.right_cluster.order, c.cluster_distance + 1, 1], dtype=np.float)
+      row = np.array([c.left_cluster.order, c.right_cluster.order, c.cluster_distance, 1], dtype=np.float)
       Z[c.order - n] = row
 
   return np.array(Z)
